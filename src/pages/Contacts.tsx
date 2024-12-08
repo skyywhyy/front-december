@@ -1,9 +1,9 @@
-import React from 'react';
+
 
 const Contacts = () => {
     return (
         <div className="text-7xl">
-            Контакты скоро будут честно  ‚‘)
+            Контакты скоро будут честно  ‚‘)ы ыыыыыыыыыы
         </div>
     );
 };

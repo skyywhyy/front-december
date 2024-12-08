@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import {Label} from "@/components/ui/label.tsx";
 import logo from "@/assets/logo.png"
 import adv from "@/assets/adv.png"
