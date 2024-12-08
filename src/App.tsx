@@ -1,7 +1,6 @@
-import React from "react";
 import {
-    BrowserRouter, Navigate,
-    Route, Router, Routes,
+    BrowserRouter,
+    Route, Routes,
 } from "react-router-dom";
 import RegForm from "@/pages/Auth/RegForm.tsx";
 import LoginForm from "@/pages/Auth/LoginForm.tsx";

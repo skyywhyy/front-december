@@ -35,8 +35,8 @@ const formSchema = z.object({
         }
         return (
             <div className="flex justify-center items-center w-screen h-screen bg-slate-50">
-                <div className="bg-white p-4 rounded-xl gap-4 w-96 flex-row justify-center">
-                    <Label className="text-xl font-semibold pb-4">
+                <div className="bg-sky-300 rounded-xl w-[416px]">
+                    <Label className="text-xl font-semibold">
                        Войти
                     </Label>
                     <Form {...form}>
