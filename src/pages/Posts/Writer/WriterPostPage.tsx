@@ -53,7 +53,7 @@ const WriterPostPage = () => {
                 </div>
                 {/*конец слайдбару*/}
                 <section className="flex flex-col ml-[240px]">
-                   <PostCard post={post} clickable={false} role="author"/>
+                   <PostCard post={post} clickable={false}/>
                 </section>
                 <div>
                     <img src={adv} alt="Реклама"/>

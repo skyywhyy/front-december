@@ -48,7 +48,7 @@ const ReaderPosts = () => {
                 {/*посты*/}
                 <section className="flex flex-col ml-[240px]  gap-[72px]">
                     {posts.map((post) => (
-                        <PostCard key={post.id} post={post} role="reader"/>
+                        <PostCard key={post.id} post={post}/>
                     ))}
                 </section>
                 <div>

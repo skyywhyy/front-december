@@ -1,4 +1,3 @@
-
 import logo from "@/assets/logo.png";
 import {Label} from "@/components/ui/label.tsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";

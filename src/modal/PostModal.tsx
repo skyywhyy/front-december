@@ -4,9 +4,23 @@ import {Input} from "@/components/ui/input.tsx";
 import ImageUpload from "@/modal/ImageUpload.tsx";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import {Button} from "@/components/ui/button.tsx";
+import {UseFormReturn} from "react-hook-form";
+import {FC} from "react";
 
+interface PostFormValues {
+    title: string;
+    content: string;
+    image?: FileList | undefined;
+}
+interface PostModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    form: UseFormReturn<PostFormValues>;
+    onSubmit: (values: { title: string; content: string }) => void;
+    title: string;
+}
 
-const PostModal = ({isOpen, onClose, form, onSubmit, title}) => {
+const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title}) => {
     if (!isOpen) return null;
 
     return(
@@ -18,7 +32,7 @@ const PostModal = ({isOpen, onClose, form, onSubmit, title}) => {
                 className="bg-white p-4 rounded-md w-[544px] shadow-lg"
                 onClick={(e) => e.stopPropagation()}
             >
-                <Form {...form}>
+                <Form<PostFormValues> {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} >
                         <div className="flex flex-col gap-4">
                             <Label className="text-xl">{title}</Label>
@@ -39,7 +53,7 @@ const PostModal = ({isOpen, onClose, form, onSubmit, title}) => {
                             <FormField
                                 control={form.control}
                                 name="image"
-                                render={({ field }) => (
+                                render={() => (
                                     <FormItem>
                                         <FormControl>
                                             <ImageUpload />
