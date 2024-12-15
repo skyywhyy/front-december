@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import {Label} from "@radix-ui/react-label";
-import {Link, useNavigate} from "react-router-dom";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
+import {useAuth} from "@/context/AuthProvider.tsx";
 
 const formSchema = z.object({
     email: z.string().min(2, "Введите корректный email").max(50),
@@ -27,7 +27,8 @@ const formSchema = z.object({
         path:["confirmPassword"],
 } );
 
-const RegForm = () => {
+const RegForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
+    const {register}= useAuth();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -38,15 +39,14 @@ const RegForm = () => {
         },
     })
 
-    const navigate = useNavigate();
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log("Успешная регистрация", values);
-        navigate('/posts');
+        register()
     }
 
     return (
         <div className="flex justify-center items-center w-screen h-screen bg-slate-50">
-            <div className="bg-white p-4 rounded-xl gap-4 w-96 flex-row justify-center">
+            <div className="flex flex-col bg-white p-4 rounded-xl gap-4 w-96 justify-center">
                 <Label className="text-xl font-semibold">
                     Создать аккаунт
                 </Label>
@@ -97,6 +97,7 @@ const RegForm = () => {
                             name="role"
                             render={({ field }) => (
                                 <FormItem>
+                                    <FormLabel>Выберите роль</FormLabel>
                                     <Tabs
                                         value={field.value}
                                         onValueChange={(value) => field.onChange(value)}
@@ -110,12 +111,12 @@ const RegForm = () => {
                             )}
                         />
 
-                        <Button className="w-full" type="submit">Войти</Button>
+                        <Button className="w-full" type="submit">Создать аккаунт</Button>
                     </form>
                 </Form>
 
                 <Label>
-                    Уже есть аккаунт? <Link to="/login" className="text-indigo-500 hover:text-indigo-300">Войти</Link>
+                    Уже есть аккаунт? <span onClick={switchToLogin} className="text-indigo-500 hover:text-indigo-300">Войти</span>
                 </Label>
 
             </div>
