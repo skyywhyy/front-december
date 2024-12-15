@@ -32,7 +32,7 @@ const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title})
                 className="bg-white p-4 rounded-md w-[544px] shadow-lg"
                 onClick={(e) => e.stopPropagation()}
             >
-                <Form {...form}>
+                <Form<PostFormValues> {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} >
                         <div className="flex flex-col gap-4">
                             <Label className="text-xl">{title}</Label>
@@ -53,7 +53,7 @@ const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title})
                             <FormField
                                 control={form.control}
                                 name="image"
-                                render={() => (
+                                render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
                                             <ImageUpload />
