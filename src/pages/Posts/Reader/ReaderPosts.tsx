@@ -1,8 +1,8 @@
 
 import adv from "@/assets/adv.png"
-import {ReactComponent as NewsPaper} from "@/assets/newspaper.svg"
-import {ReactComponent as Phone} from "@/assets/phone.svg";
-import {ReactComponent as Logout} from "@/assets/log-out.svg"
+import NewsPaper from "@/assets/newspaper.svg?react";
+import Phone from "@/assets/phone.svg?react";
+import Logout from "@/assets/log-out.svg?react"
 import {Toggle} from "@/components/ui/toggle.tsx";
 import posts from "../postsdata.ts"
 import {Link} from "react-router-dom";

@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
-import {ReactComponent as Upload} from "@/assets/upload.svg";
-import {ReactComponent as Delete} from "@/assets/trash-2.svg";
+import Upload from "@/assets/upload.svg?react";
+import Delete from "@/assets/trash-2.svg?react";
 
 const ImageUpload = () => {
     const [isImageVisible, setIsImageVisible] = useState(false); // Управляем отображением изображения

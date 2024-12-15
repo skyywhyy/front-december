@@ -1,5 +1,6 @@
 import {createContext, ReactNode, useContext, useEffect, useState} from "react";
 import {jwtDecode} from "jwt-decode";
+import {useNavigate} from "react-router";
 
 
 interface IAuthContext {
@@ -34,10 +35,17 @@ export const AuthProvider = ({ children }: IAuthProvider) => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            setIsAuthenticated(true);
-            const decode = jwtDecode<IUser>(token);
-            setUser({ id: decode.id, email: decode.email, role: decode.role });
-            console.log(decode);
+            try {
+                const decoded = jwtDecode<IUser>(token);
+                setUser({ id: decoded.id, email: decoded.email, role: decoded.role });
+                setIsAuthenticated(true);
+            } catch (error) {
+                console.error("Ошибка при декодировании токена:", error);
+                logout(); // Очистить некорректный токен
+            }
+        } else {
+            console.warn("Токен отсутствует. Перенаправление на страницу входа.");
+            setIsAuthenticated(false);
         }
         setIsLoading(false);
     }, []);
@@ -48,14 +56,23 @@ export const AuthProvider = ({ children }: IAuthProvider) => {
     // }, [user]);
 
     const login = () => {
-        const token =localStorage.getItem("token");
-        const decoded = jwtDecode<IUser>(token);
-        setUser({
-            id: decoded.id,
-            email: decoded.email,
-            role: decoded.role,
-        });
-        setIsAuthenticated(true);
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const decoded = jwtDecode<IUser>(token);
+                setUser({
+                    id: decoded.id,
+                    email: decoded.email,
+                    role: decoded.role,
+                });
+                setIsAuthenticated(true);
+            } catch (error) {
+                console.error("Некорректный токен:", error);
+                logout();
+            }
+        } else {
+            console.error("Попытка логина без токена.");
+        }
     };
 
     const logout = () => {

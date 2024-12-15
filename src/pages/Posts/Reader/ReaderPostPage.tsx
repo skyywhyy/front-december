@@ -1,9 +1,9 @@
 import {Link, useParams} from "react-router-dom";
 import posts from "../postsdata.ts";
 import Header from "@/components/ui/Header.tsx";
-import {ReactComponent as NewsPaper} from "@/assets/newspaper.svg"
-import {ReactComponent as Phone} from "@/assets/phone.svg";
-import {ReactComponent as Logout} from "@/assets/log-out.svg"
+import NewsPaper from "@/assets/newspaper.svg?react";
+import Phone from "@/assets/phone.svg?react";
+import Logout from "@/assets/log-out.svg?react"
 import {Toggle} from "@/components/ui/toggle.tsx";
 import adv from "@/assets/adv.png";
 import PostCard from "@/pages/Posts/PostCard.tsx";

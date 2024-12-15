@@ -2,10 +2,8 @@ import {
     BrowserRouter, Navigate,
     Route, Routes,
 } from "react-router-dom";
-import ReaderPosts from "@/pages/Posts/Reader/ReaderPosts.tsx";
 import ReaderContacts from "@/pages/Posts/Reader/ReaderContacts.tsx";
 import ReaderPostPage from "@/pages/Posts/Reader/ReaderPostPage.tsx";
-import WriterPosts from "@/pages/Posts/Writer/WriterPosts.tsx";
 import WriterPostPage from "@/pages/Posts/Writer/WriterPostPage.tsx";
 import AuthPage from "@/pages/Auth/AuthPage.tsx";
 import { useAuth} from "@/context/AuthProvider.tsx";
