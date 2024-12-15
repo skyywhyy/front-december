@@ -10,7 +10,7 @@ import {useAuth} from "@/context/AuthProvider.tsx";
 import {FC} from "react";
 
 interface Post {
-    id: string;
+    id: number;
     author: string;
     title: string;
     content: string;
@@ -24,8 +24,8 @@ interface Post {
 interface PostCardProps {
     post: Post;
     clickable?: boolean;
-    onPublic: () => void;
-    onEdit: () => void;
+    onPublic?: () => void;
+    onEdit?: () => void;
 }
 
 const PostCard: FC<PostCardProps> = ({
@@ -72,27 +72,31 @@ const PostCard: FC<PostCardProps> = ({
             <p className="mt-2 text-sm">{post.content}</p>
             {isAuthorOfPost && (
                 <div className="mt-4 flex gap-2">
-                    {archive && ( // Если архивный, показываем "Опубликовать" и "Редактировать"
+                    {archive && (
                         <>
-                            <Button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onPublic();
-                                }}
-                            >
-                                Опубликовать
-                            </Button>
+                            {onPublic && (
+                                <Button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onPublic();
+                                    }}
+                                >
+                                    Опубликовать
+                                </Button>
+                            )}
                         </>
                     )}
-                    <Button
-                        variant={"secondary"}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            onEdit();
-                        }}
-                    >
-                        Редактировать
-                    </Button>
+                    {onEdit && (
+                        <Button
+                            variant="secondary"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onEdit();
+                            }}
+                        >
+                            Редактировать
+                        </Button>
+                    )}
                 </div>
             )}
             <div className="text-sm text-slate-400 flex gap-3">

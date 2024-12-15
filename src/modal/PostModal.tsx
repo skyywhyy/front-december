@@ -53,7 +53,7 @@ const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title})
                             <FormField
                                 control={form.control}
                                 name="image"
-                                render={({ field }) => (
+                                render={() => (
                                     <FormItem>
                                         <FormControl>
                                             <ImageUpload />
