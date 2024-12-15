@@ -1,12 +1,11 @@
-
 import logo from "@/assets/logo.png";
 import {Label} from "@/components/ui/label.tsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";
 import {Link} from "react-router-dom";
 import {Toggle} from "@/components/ui/toggle.tsx";
-import NewsPaper from "@/assets/newspaper.svg?react";
-import Phone from "@/assets/phone.svg?react";
-import Logout from "@/assets/log-out.svg?react"
+import {ReactComponent as NewsPaper} from "@/assets/newspaper.svg"
+import {ReactComponent as Phone} from "@/assets/phone.svg";
+import {ReactComponent as Logout} from "@/assets/log-out.svg"
 
 
 
