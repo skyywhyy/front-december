@@ -30,6 +30,7 @@ const postSchema = z.object({
         .optional(),
 });
 
+type PostFormValues = z.infer<typeof postSchema>;
 
 const WriterPosts = () => {
     const [filter, setFilter] = useState("Все посты"); // Состояние фильтра
@@ -58,7 +59,7 @@ const WriterPosts = () => {
     }
 
 
-    const form = useForm({
+    const form = useForm<PostFormValues>({
         resolver: zodResolver(postSchema),
         defaultValues: {
             title: "",
@@ -67,13 +68,13 @@ const WriterPosts = () => {
         },
     });
 
-    const onOpenSubmit = (values: { title: string; content: string }) => {
+    const onOpenSubmit = (values: PostFormValues) => {
         console.log("Новый пост:", values);
         setIsCreateModalOpen(false);
         form.reset();
     };
 
-    const onEditSubmit = (values: { title: string; content: string }) => {
+    const onEditSubmit = (values: PostFormValues) => {
         console.log("Пост отредачен:", values);
         setIsEditModalOpen(false);
         form.reset();
@@ -85,13 +86,21 @@ const WriterPosts = () => {
         <div className="bg-slate-50">
 
             {/*окно для редактирования*/}
-            <PostModal isOpen={isEditModalOpen} onClose={closeEditModal} form={form} title="Редактировать" onSubmit={onEditSubmit}>
-            </PostModal>
+            <PostModal
+                isOpen={isEditModalOpen}
+                onClose={closeEditModal}
+                form={form}
+                title="Редактировать"
+                onSubmit={onEditSubmit}/>
 
 
             {/*окно для создания*/}
-            <PostModal isOpen={isCreateModalOpen} onClose={closeCreateModal} form={form} title="Создать пост" onSubmit={onOpenSubmit}>
-            </PostModal>
+            <PostModal
+                isOpen={isCreateModalOpen}
+                onClose={closeCreateModal}
+                form={form}
+                title="Создать пост"
+                onSubmit={onOpenSubmit}/>
             <Header/>
             <main className="flex gap-8 px-[336px] pt-32">
 

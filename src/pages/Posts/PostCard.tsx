@@ -7,8 +7,28 @@ import Likes from "@/assets/likes.svg";
 import comments from "@/assets/comments.svg";
 import {Button} from "@/components/ui/button.tsx";
 import {useAuth} from "@/context/AuthProvider.tsx";
+import {FC} from "react";
 
-const PostCard = ({
+interface Post {
+    id: string;
+    author: string;
+    title: string;
+    content: string;
+    date: string;
+    image?: string; // Если изображение может быть необязательным
+    likes: number;
+    comments: number;
+    draft: boolean;
+}
+
+interface PostCardProps {
+    post: Post;
+    clickable?: boolean;
+    onPublic: () => void;
+    onEdit: () => void;
+}
+
+const PostCard: FC<PostCardProps> = ({
                       post,
                       clickable = true,
                       onPublic,
