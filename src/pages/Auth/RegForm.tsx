@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input"
 import {Label} from "@radix-ui/react-label";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
 import {useAuth} from "@/context/AuthProvider.tsx";
+import {registerService} from "@/pages/Auth/servises/auth.service.ts";
+import {useState} from "react";
 
 const formSchema = z.object({
     email: z.string().min(2, "Введите корректный email").max(50),
@@ -28,7 +30,8 @@ const formSchema = z.object({
 } );
 
 const RegForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
-    const {register}= useAuth();
+    const {login} = useAuth();
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -39,9 +42,23 @@ const RegForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
         },
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("Успешная регистрация", values);
-        register()
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            const { refreshToken, accessToken } = await registerService(values);
+            if(refreshToken && accessToken){
+                localStorage.setItem("token", accessToken);
+                localStorage.setItem("refreshToken", refreshToken);
+                localStorage.setItem("email", values.email);
+                login();
+            }
+
+        } catch (error) {
+            if (error instanceof Error) {
+                setErrorMessage(error.message || "Ошибка при регистрации");
+            } else {
+                setErrorMessage("Неизвестная ошибка");
+            }
+        }
     }
 
     return (
@@ -110,6 +127,12 @@ const RegForm = ({ switchToLogin }: { switchToLogin: () => void }) => {
                                 </FormItem>
                             )}
                         />
+
+                        {errorMessage && (
+                            <div className={""} style={{ color: "red", marginTop: "10px" }}>
+                                {errorMessage}
+                            </div>
+                        )}
 
                         <Button className="w-full" type="submit">Создать аккаунт</Button>
                     </form>
