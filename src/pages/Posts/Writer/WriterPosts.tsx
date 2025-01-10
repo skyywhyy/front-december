@@ -151,7 +151,7 @@ const WriterPosts = () => {
                             </MenubarTrigger>
                             <MenubarTrigger
                                 onClick={() => setFilter("Черновики")}
-                                className={clsx(filter === "Черновики" && "bg-slate-200 text-black")}
+                                className={clsx(filter === "Черновики" && "bg-slate-100")}
                             >
                                 Черновики
                             </MenubarTrigger>

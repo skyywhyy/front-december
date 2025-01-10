@@ -14,6 +14,8 @@ import {
 import { Input } from "@/components/ui/input"
 import {Label} from "@radix-ui/react-label";
 import {useAuth} from "@/context/AuthProvider.tsx";
+import {loginService} from "@/pages/Auth/servises/auth.service.ts";
+import {useState} from "react";
 
 const formSchema = z.object({
     email: z.string().min(2, "Введите корректный email").max(50),
@@ -23,6 +25,7 @@ const formSchema = z.object({
 
 const LoginForm = ({ switchToRegister }: { switchToRegister: () => void }) => {
     const {login} = useAuth();
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -30,20 +33,22 @@ const LoginForm = ({ switchToRegister }: { switchToRegister: () => void }) => {
             password:""
         },
     })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Логика авторизации
-        if (values.email === "denchikdog3@gmail.com" && values.password === "111111") {
-            const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImYxNjU5MTMyLWNjYWMtNDVlYy1hY2UzLTQ4NjU0YTE4M2ZjYiIsInJvbGUiOiJSZWFkZXIiLCJlbWFpbCI6ImRlbmNoaWtkb2czQGdtYWlsLmNvbSIsImlhdCI6MTczNDIwOTA2NywiZXhwIjoxNzM0MjE2MjY3fQ.xyy9f669aIzR1XnzVWxKuKQ47k-HKraVQTjA7dzqJ-I";
-            localStorage.setItem("token", token);
-            login();
-        }
-        else if (values.email ==="denchikgod3@gmail.com" && values.password ==="111111"){
-            const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI1YWUxM2E5LTM2YTktNGJlNS1iN2Y3LWFhNWUzZTVhMzgyMiIsInJvbGUiOiJBdXRob3IiLCJlbWFpbCI6ImRlbmNoaWtnb2QzQGdtYWlsLmNvbSIsImlhdCI6MTczNDE3NjQ1NSwiZXhwIjoxNzM0MTgzNjU1fQ.9iNBmBYXbRr09xZ5cFt4Gbc7N0PAUS2Z1r_mpZHA1Do";
-            localStorage.setItem("token",token);
-            login();
-        }
-        else {
-            alert("Неверный логин или пароль");
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            const { refreshToken, accessToken } = await loginService(values);
+            if(refreshToken && accessToken){
+                localStorage.setItem("token", accessToken);
+                localStorage.setItem("refreshToken", refreshToken);
+                localStorage.setItem("email", values.email);
+                login();
+            }
+
+        } catch (error) {
+            if (error instanceof Error) {
+                setErrorMessage(error.message || "Ошибка при авторизации");
+            } else {
+                setErrorMessage("Неизвестная ошибка");
+            }
         }
     }
     return (
@@ -81,6 +86,11 @@ const LoginForm = ({ switchToRegister }: { switchToRegister: () => void }) => {
                                 </FormItem>
                             )}
                         />
+                        {errorMessage && (
+                            <div style={{ color: "red", marginTop: "10px" }}>
+                                {errorMessage}
+                            </div>
+                        )}
                         <Button className="w-full" type="submit">Войти</Button>
                     </form>
                 </Form>

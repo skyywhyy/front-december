@@ -3,7 +3,7 @@ import {jwtDecode} from "jwt-decode";
 
 
 interface IAuthContext {
-    userId: string;
+    userId: number;
     role: string;
     email: string;
     isAuthenticated: boolean;
@@ -18,8 +18,8 @@ interface IAuthProvider {
 }
 
 interface IUser {
-    id: string;
-    email: string;
+    id: number;
+    email: string | null;
     role: 'Reader' | 'Author';
 }
 
@@ -28,15 +28,18 @@ export const AuthContext = createContext<IAuthContext | undefined>(undefined);
 export const AuthProvider = ({ children }: IAuthProvider) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState<IUser>({ id: '0', email: 'example@mail.ru', role: 'Reader' });
+    const [user, setUser] = useState<IUser>({ id: 0, email: 'example@mail.ru', role: 'Reader' });
 
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        const email = localStorage.getItem('email');
         if (token) {
             try {
-                const decoded = jwtDecode<IUser>(token);
-                setUser({ id: decoded.id, email: decoded.email, role: decoded.role });
+                const decoded = jwtDecode<any>(token); //ебать токен если честно извините за мой французский
+                setUser({ id: decoded.Id,
+                    email: email,
+                    role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],});
                 setIsAuthenticated(true);
             } catch (error) {
                 console.error("Ошибка при декодировании токена:", error);
@@ -56,19 +59,21 @@ export const AuthProvider = ({ children }: IAuthProvider) => {
 
     const login = () => {
         const token = localStorage.getItem("token");
+        const email = localStorage.getItem('email');
         if (token) {
             try {
-                const decoded = jwtDecode<IUser>(token);
-                setUser({
-                    id: decoded.id,
-                    email: decoded.email,
-                    role: decoded.role,
-                });
+                const decoded = jwtDecode<any>(token);
+                console.log("Декодированный токен:", decoded);
+                setUser({ id: decoded.Id,
+                    email: email,
+                    role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],});
                 setIsAuthenticated(true);
+                setIsLoading(false);
             } catch (error) {
                 console.error("Некорректный токен:", error);
                 logout();
             }
+
         } else {
             console.error("Попытка логина без токена.");
         }
@@ -76,7 +81,9 @@ export const AuthProvider = ({ children }: IAuthProvider) => {
 
     const logout = () => {
         localStorage.removeItem('token');
-        setUser({ id: '0', email: 'example@mail.ru', role: 'Reader' });
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('email');
+        setUser({ id: 0, email: 'example@mail.ru', role: 'Reader' });
         setIsAuthenticated(false);
     };
 
@@ -85,7 +92,16 @@ export const AuthProvider = ({ children }: IAuthProvider) => {
     };
 
     return (
-        <AuthContext.Provider value={{ userId: user.id, role: user.role, email: user.email, isAuthenticated, isLoading, login, logout, register }}>
+        <AuthContext.Provider value={{
+            userId: user.id,
+            role: user.role,
+            email: user.email ||"",
+            isAuthenticated,
+            isLoading,
+            login,
+            logout,
+            register
+        }}>
             {children}
         </AuthContext.Provider>
     );
