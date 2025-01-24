@@ -1,5 +1,4 @@
 import {Link, useParams} from "react-router-dom";
-import posts from "../postsdata.ts";
 import Header from "@/components/ui/Header.tsx";
 import NewsPaper from "@/assets/newspaper.svg?react";
 import Phone from "@/assets/phone.svg?react";
@@ -7,10 +6,12 @@ import Logout from "@/assets/log-out.svg?react"
 import {Toggle} from "@/components/ui/toggle.tsx";
 import adv from "@/assets/adv.png";
 import PostCard from "@/pages/Posts/PostCard.tsx";
+import {usePosts} from "@/context/PostContext.tsx";
 
 
 const ReaderPostPage = () => {
     const { postId } = useParams<{ postId: string }>();
+    const {posts} = usePosts()
     const post = posts.find((p) => p.id === parseInt(postId || "", 10));
 
     if (!post) {

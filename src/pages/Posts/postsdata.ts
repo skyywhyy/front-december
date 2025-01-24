@@ -44,6 +44,17 @@
          likes : 1000,
          comments: 0,
          draft: false
+     },
+     {
+         id: 5,
+         author: "kek@mail.com",
+         title: "4 пост и он не его",
+         content: "Это содержание 4 поста. Здесь будет текст поста.",
+         date: "12 ноября",
+         image: "",
+         likes : 1000,
+         comments: 0,
+         draft: false
      }
 ];
 export default posts;

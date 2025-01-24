@@ -10,13 +10,13 @@ import {FC} from "react";
 interface PostFormValues {
     title: string;
     content: string;
-    image?: FileList | undefined;
+    image?: File | string | null;
 }
 interface PostModalProps {
     isOpen: boolean;
     onClose: () => void;
     form: UseFormReturn<PostFormValues>;
-    onSubmit: (values: { title: string; content: string }) => void;
+    onSubmit: (values: PostFormValues, action: "publish" | "draft") => void | Promise<void>;
     title: string;
 }
 
@@ -26,14 +26,21 @@ const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title})
     return(
         <div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-             onClick={onClose}
+            onClick={(e) => {
+                // Если пользователь выделил текст, то getSelection()?.toString() вернёт строку с выделенным текстом
+                if (window.getSelection()?.toString()) {
+                    e.stopPropagation();
+                    return;
+                }
+                onClose();
+            }}
         >
             <div
                 className="bg-white p-4 rounded-md w-[544px] shadow-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <Form<PostFormValues> {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} >
+                    <form onSubmit={form.handleSubmit((values) => onSubmit(values, "publish"))} >
                         <div className="flex flex-col gap-4">
                             <Label className="text-xl">{title}</Label>
                             <FormField
@@ -53,10 +60,17 @@ const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title})
                             <FormField
                                 control={form.control}
                                 name="image"
-                                render={() => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormControl>
-                                            <ImageUpload />
+                                            <ImageUpload
+                                                initialImageUrl={
+                                                    typeof field.value === "string" ? field.value : undefined
+                                                }
+                                                fileSelect={(file) => {
+                                                    field.onChange(file);
+                                                }}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -82,10 +96,21 @@ const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title})
                             />
                             {/* Кнопка отправки */}
                             <div className='flex gap-2'>
-                                <Button type="submit">
+                                <Button
+                                    type="button"
+                                    onClick={form.handleSubmit((values) =>
+                                        onSubmit(values, "publish")
+                                    )}
+                                >
                                     Опубликовать пост
                                 </Button>
-                                <Button variant="secondary" type="submit">
+                                <Button
+                                    variant="secondary"
+                                    type="button"
+                                    onClick={form.handleSubmit((values) =>
+                                        onSubmit(values, "draft")
+                                    )}
+                                >
                                     Отправить в черновики
                                 </Button>
                             </div>

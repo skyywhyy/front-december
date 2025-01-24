@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import {Label} from "@radix-ui/react-label";
 import {useAuth} from "@/context/AuthProvider.tsx";
-import {loginService} from "@/pages/Auth/servises/auth.service.ts";
+import {loginService} from "@/serviсes/auth.service.ts";
 import {useState} from "react";
 
 const formSchema = z.object({
