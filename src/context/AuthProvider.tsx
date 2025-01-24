@@ -10,7 +10,6 @@ interface IAuthContext {
     isLoading: boolean;
     login: () => void;
     logout: () => void;
-    register: () => void;
 }
 
 interface IAuthProvider {
@@ -36,34 +35,28 @@ export const AuthProvider = ({ children }: IAuthProvider) => {
         const email = localStorage.getItem('email');
         if (token) {
             try {
-                const decoded = jwtDecode<any>(token); //ебать токен если честно извините за мой французский
-                setUser({ id: decoded.Id,
+                const decoded = jwtDecode<any>(token);
+                setUser({
+                    id: decoded.Id,
                     email: email,
                     role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],});
                 setIsAuthenticated(true);
             } catch (error) {
                 console.error("Ошибка при декодировании токена:", error);
-                logout(); // Очистить некорректный токен
+                logout();
             }
         } else {
             console.warn("Токен отсутствует. Перенаправление на страницу входа.");
             setIsAuthenticated(false);
         }
-        setIsLoading(false);
     }, []);
 
-
-    // useEffect(() => {
-    //         console.log("Пользователь обновлён:", user);
-    // }, [user]);
-
     const login = () => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");  //ебать токен если честно извините за мой французский
         const email = localStorage.getItem('email');
         if (token) {
             try {
                 const decoded = jwtDecode<any>(token);
-                console.log("Декодированный токен:", decoded);
                 setUser({ id: decoded.Id,
                     email: email,
                     role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],});
@@ -83,12 +76,8 @@ export const AuthProvider = ({ children }: IAuthProvider) => {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('email');
-        setUser({ id: 0, email: 'example@mail.ru', role: 'Reader' });
+        setUser({ id: -1, email: 'example@mail.ru', role: 'Reader' });
         setIsAuthenticated(false);
-    };
-
-    const register = () => {
-        setIsAuthenticated(true);
     };
 
     return (
@@ -100,7 +89,6 @@ export const AuthProvider = ({ children }: IAuthProvider) => {
             isLoading,
             login,
             logout,
-            register
         }}>
             {children}
         </AuthContext.Provider>

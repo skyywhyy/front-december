@@ -2,9 +2,7 @@ import adv from "@/assets/adv.png"
 import NewsPaper from "@/assets/newspaper.svg?react";
 import Phone from "@/assets/phone.svg?react";
 import Logout from "@/assets/log-out.svg?react"
-
 import {Toggle} from "@/components/ui/toggle.tsx";
-import posts from "@/pages/Posts/postsdata.ts"
 import {Link} from "react-router-dom";
 import Header from "@/components/ui/Header.tsx";
 import {
@@ -21,38 +19,64 @@ import PostModal from "@/modal/PostModal.tsx";
 import { z } from "zod";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
+import {Post, usePosts} from "@/context/PostContext.tsx";
+import {PublicService} from "@/serviсes/public.service.ts";
 
 const postSchema = z.object({
-    title: z.string().min(3, "Заголовок должен быть не короче 3 символов"),
-    content: z.string().min(10, "Содержание должно быть не короче 10 символов"),
-    image: z
-        .union([z.instanceof(FileList), z.undefined()]) // Поле может быть FileList или undefined
-        .optional(),
+    id: z.number().optional(),
+    title: z.string().min(1, "Заголовок должен быть не короче 1 символа"),
+    content: z.string().min(1, "Содержание должно быть не короче 1 символа"),
+    image: z.union([
+        z.instanceof(File),
+        z.string(),
+        z.null(),
+        z.undefined(),
+    ]),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
 
 const WriterPosts = () => {
-    const [filter, setFilter] = useState("Все посты"); // Состояние фильтра
-
-    const {email, logout} = useAuth();
-
+    const [filter, setFilter] = useState("Все посты");
+    const {userId, logout} = useAuth();
+    const {posts, fetchPosts} =usePosts()
     const filteredPosts = posts.filter((post) => {
-        if (filter === "Все посты")  return post?.draft === false || post.author === email;;
-        if (filter === "Мои посты") return post.author === email;
-        if (filter === "Черновики") return post.draft && post.author === email;
+        if (filter === "Все посты")  return  post.status === "published" || post.authorId === userId ;
+        if (filter === "Мои посты")  return post.authorId === Number(userId);
+        if (filter === "Черновики")  return post.status === "draft" && post.authorId === Number(userId);
         return true;
     });
 
+
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const openCreateModal = () => setIsCreateModalOpen(true)
+    const openCreateModal = () => {
+        form.reset({
+            title: "",
+            content: "",
+            image: undefined,
+        });
+        console.log("Форма сброшена для создания:", form.getValues());
+        setIsCreateModalOpen(true);
+    };
     const closeCreateModal = () => {
         form.reset();
         setIsCreateModalOpen(false)
     }
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const openEditModal = () => setIsEditModalOpen(true)
+    const openEditModal = (post: Post) => {
+        const imageUrl = post.images && post.images.length > 0
+            ? post.images[0].imageUrl
+            : undefined;
+        form.reset({
+            id: post.id,
+            title: post.title,
+            content: post.content,
+            image: imageUrl,
+        });
+        setIsEditModalOpen(true);
+    };
     const closeEditModal = () => {
         form.reset();
         setIsEditModalOpen(false)
@@ -68,16 +92,88 @@ const WriterPosts = () => {
         },
     });
 
-    const onOpenSubmit = (values: PostFormValues) => {
-        console.log("Новый пост:", values);
-        setIsCreateModalOpen(false);
-        form.reset();
+    const onCreateSubmit = async (values: PostFormValues, action: "publish" | "draft") => {
+        console.log("Данные формы:", values);
+        console.log("Действие:", action);
+        try {
+
+            const dataForUpdate = {
+                title: values.title,
+                content: values.content,
+                image: values.image instanceof File ? values.image : undefined
+            };
+            if (values.image instanceof File) {
+                dataForUpdate.image = values.image;
+            }
+            const draftPost = await PublicService.createPost(dataForUpdate);
+
+            console.log("Пост сохранён как черновик:", draftPost);
+
+            if (action === "publish") {
+                const publishedPost= await PublicService.publicPost(draftPost.id);
+                console.log("Пост успешно опубликован:", publishedPost);
+            }
+           closeCreateModal();
+           await fetchPosts();
+        } catch (error) {
+            console.error("Ошибка при обработке поста:", error);
+
+        }
     };
 
-    const onEditSubmit = (values: PostFormValues) => {
-        console.log("Пост отредачен:", values);
-        setIsEditModalOpen(false);
-        form.reset();
+    const onEditSubmit = async (values: PostFormValues,  action: "publish" | "draft") => {
+        try {
+            const post = posts.find((p) => p.id === values.id);
+            console.log(post)
+            //удаление старого изображения
+            if (post?.images && post.images.length > 0) {
+                const currentImageUrl = post.images[0].imageUrl;
+
+                // Если пользователь явно удалил картинку (ImageUpload вернул null)
+                // или загрузил новую (File)
+                if (values.image === null || values.image instanceof File) {
+                    const imageId = post.images[0].id;
+                    await PublicService.deleteImage(post.id, imageId);
+                }
+                    // Если пользователь передал другую строку
+                else if (typeof values.image === "string" && values.image !== currentImageUrl) {
+                    const imageId = post.images[0].id;
+                    await PublicService.deleteImage(post.id, imageId);
+                }
+            }
+
+            const dataForUpdate: {
+                title: string;
+                content: string;
+                image: File | undefined;
+            } = {
+                title: values.title,
+                content: values.content,
+                image: values.image instanceof File ? values.image : undefined,
+            };
+            // Если пользователь загрузил новый файл
+            if (values.image instanceof File) {
+                dataForUpdate.image = values.image;
+            }
+            // Если пользователь удалил картинку
+            else if (values.image === undefined) {
+                dataForUpdate.image = undefined;
+            }
+            // Если пользователь оставил строку (старый URL) – ничего не делаем
+            if (!values.id) throw new Error("ID поста отсутствует");
+            await PublicService.editPost(values.id, dataForUpdate);
+
+            if (action === "publish" && post?.status ==="draft") {
+                const publishedPost= await PublicService.publicPost(values.id);
+                console.log("Пост успешно опубликован:", publishedPost);
+            }
+
+            closeEditModal();
+            await fetchPosts();
+        } catch (error) {
+            console.error("Ошибка при обработке поста:", error);
+
+        }
     };
 
 
@@ -100,9 +196,9 @@ const WriterPosts = () => {
                 onClose={closeCreateModal}
                 form={form}
                 title="Создать пост"
-                onSubmit={onOpenSubmit}/>
+                onSubmit={onCreateSubmit}/>
             <Header/>
-            <main className="flex gap-8 px-[336px] pt-32">
+            <main className="flex gap-8 justify-center pt-32">
 
                 {/*это слайдбар*/}
                 <div className="fixed top-32 left-[336px] w-[208px] h-[672px] flex flex-col justify-between items-start">
@@ -123,18 +219,16 @@ const WriterPosts = () => {
                             </Toggle>
                         </Link>
                     </div>
-                    <Link onClick={logout} to="/auth">
-                        <Toggle
-                            className="w-[208px] text-slate-400 justify-start ">
-                            <Logout/>
-                            Выйти
-                        </Toggle>
-                    </Link>
+                    <Toggle   onClick={logout}
+                              className="w-[208px] text-slate-400 justify-start ">
+                        <Logout/>
+                        Выйти
+                    </Toggle>
                 </div>
                 {/*конец слайдбару*/}
 
                 {/*посты*/}
-                <section className="flex flex-col ml-[240px]  gap-6">
+                <section className="flex flex-col ml-[240px] w-[768px] gap-6">
                     <Menubar className="w-[304px]">
                         <MenubarMenu>
                             <MenubarTrigger
@@ -163,7 +257,10 @@ const WriterPosts = () => {
                             key={post.id}
                             post={post}
                             clickable={true}
-                            onPublic={() => console.log("Пост опубликован!")}
+                            onPublic={async () => {
+                                await PublicService.publicPost(post.id);
+                                await fetchPosts();
+                            }}
                             onEdit={openEditModal}
                         />
                     ))}
@@ -173,8 +270,7 @@ const WriterPosts = () => {
                 </div>
             </main>
         </div>
-    )
-        ;
+    );
 };
 
 export default WriterPosts;

@@ -60,7 +60,7 @@ export async function registerService(payload: RegisterPayload): Promise<{ acces
             throw new Error(errorData.error || "Ошибка при регистрации");
         }
 
-        return await response.json(); // Ожидаем объект { accessToken, refreshToken }
+        return await response.json();
     } catch (error) {
         console.error("Ошибка при регистрации:", error);
         throw error;

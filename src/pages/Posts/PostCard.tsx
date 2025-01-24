@@ -8,36 +8,29 @@ import comments from "@/assets/comments.svg";
 import {Button} from "@/components/ui/button.tsx";
 import {useAuth} from "@/context/AuthProvider.tsx";
 import {FC} from "react";
+import {Post} from "@/context/PostContext.tsx";
 
-interface Post {
-    id: number;
-    author: string;
-    title: string;
-    content: string;
-    date: string;
-    image?: string; // Если изображение может быть необязательным
-    likes: number;
-    comments: number;
-    draft: boolean;
-}
 
 interface PostCardProps {
     post: Post;
     clickable?: boolean;
     onPublic?: () => void;
-    onEdit?: () => void;
+    onEdit?: (post:Post) => void;
 }
 
 const PostCard: FC<PostCardProps> = ({
-                      post,
-                      clickable = true,
-                      onPublic,
-                      onEdit,
-
-                  }) => {
-    const {role, email} = useAuth();
-    const archive= post.draft;
-    const isAuthorOfPost = role === "Author" && email === post.author;
+      post,
+      clickable = true,
+      onPublic,
+      onEdit,
+                                     }) => {
+    const { userId} = useAuth();
+    const date = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' }).format(
+        new Date(post.createdAt)
+    );
+   // const archive= post.status;
+    // const isAuthorOfPost = userId === post.authorId;
+    const isAuthorOfPost = Number(userId) === Number(post.authorId);
     const content = (
         <Card
             className={clsx(
@@ -53,34 +46,37 @@ const PostCard: FC<PostCardProps> = ({
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                    <Label className="font-normal">{post.author}</Label>
-                    <Label className="text-xs text-slate-400">{post.date}</Label>
+                    <Label className="font-normal">Автор под айдишником {post.authorId}</Label>
+                    <Label className="text-xs text-slate-400"> {date}</Label>
                 </div>
             </div>
             <CardTitle>{post.title}</CardTitle>
-            {post.image ? (
+            {post.images.length >0 ? (
                 <img
-                    src={post.image}
+                    src={post.images[0].imageUrl}
                     alt={post.title}
-                    className="w-full h-[432px] object-cover"
+                    className="w-full h-[432px] object-cover rounded-md"
                 />
             ) : (
                 <div className="h-[432px] bg-slate-300 rounded-md flex items-center justify-center">
                     <p className="text-slate-600">Нет изображения</p>
                 </div>
+                // <div>
+                //
+                // </div>
+
             )}
             <p className="mt-2 text-sm">{post.content}</p>
             {isAuthorOfPost && (
                 <div className="mt-4 flex gap-2">
-                    {archive && (
+                    {post.status == "draft" && (
                         <>
                             {onPublic && (
                                 <Button
                                     onClick={(e) => {
                                         e.preventDefault();
                                         onPublic();
-                                    }}
-                                >
+                                    }}>
                                     Опубликовать
                                 </Button>
                             )}
@@ -89,11 +85,11 @@ const PostCard: FC<PostCardProps> = ({
                     {onEdit && (
                         <Button
                             variant="secondary"
+                            type="submit"
                             onClick={(e) => {
                                 e.preventDefault();
-                                onEdit();
-                            }}
-                        >
+                                onEdit(post);
+                            }}>
                             Редактировать
                         </Button>
                     )}
@@ -102,11 +98,11 @@ const PostCard: FC<PostCardProps> = ({
             <div className="text-sm text-slate-400 flex gap-3">
                 <div className="w-[60px] h-7 bg-slate-50 rounded flex items-center justify-center gap-2">
                     <img src={Likes} />
-                    <p>{post.likes}</p>
+                    <p>{post.likes || 0}</p>
                 </div>
                 <div className="w-[60px] h-7 bg-slate-50 rounded flex items-center justify-center gap-2">
                     <img src={comments} />
-                    <p>{post.comments}</p>
+                    <p>{post.comments || 0}</p>
                 </div>
             </div>
 
