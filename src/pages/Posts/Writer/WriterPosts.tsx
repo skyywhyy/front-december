@@ -56,7 +56,6 @@ const WriterPosts = () => {
             content: "",
             image: undefined,
         });
-        console.log("Форма сброшена для создания:", form.getValues());
         setIsCreateModalOpen(true);
     };
     const closeCreateModal = () => {
@@ -93,8 +92,6 @@ const WriterPosts = () => {
     });
 
     const onCreateSubmit = async (values: PostFormValues, action: "publish" | "draft") => {
-        console.log("Данные формы:", values);
-        console.log("Действие:", action);
         try {
 
             const dataForUpdate = {
@@ -107,11 +104,8 @@ const WriterPosts = () => {
             }
             const draftPost = await PublicService.createPost(dataForUpdate);
 
-            console.log("Пост сохранён как черновик:", draftPost);
-
             if (action === "publish") {
-                const publishedPost= await PublicService.publicPost(draftPost.id);
-                console.log("Пост успешно опубликован:", publishedPost);
+                await PublicService.publicPost(draftPost.id);
             }
            closeCreateModal();
            await fetchPosts();
@@ -124,7 +118,6 @@ const WriterPosts = () => {
     const onEditSubmit = async (values: PostFormValues,  action: "publish" | "draft") => {
         try {
             const post = posts.find((p) => p.id === values.id);
-            console.log(post)
             //удаление старого изображения
             if (post?.images && post.images.length > 0) {
                 const currentImageUrl = post.images[0].imageUrl;
@@ -164,8 +157,7 @@ const WriterPosts = () => {
             await PublicService.editPost(values.id, dataForUpdate);
 
             if (action === "publish" && post?.status ==="draft") {
-                const publishedPost= await PublicService.publicPost(values.id);
-                console.log("Пост успешно опубликован:", publishedPost);
+                await PublicService.publicPost(values.id);
             }
 
             closeEditModal();
