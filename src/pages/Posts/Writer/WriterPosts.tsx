@@ -37,16 +37,27 @@ const postSchema = z.object({
 type PostFormValues = z.infer<typeof postSchema>;
 
 const WriterPosts = () => {
-    const [filter, setFilter] = useState("Все посты");
+    //const [filter, setFilter] = useState("Все посты");
     const {userId, logout} = useAuth();
     const {posts, fetchPosts} =usePosts()
+    const [editingPost, setEditingPost] = useState<Post | null>(null);
+
+    const menuItems = [
+        { key: "all", label: "Все посты" },
+        { key: "my", label: "Мои посты" },
+        { key: "drafts", label: "Черновики" }
+    ];
+
+
+    const [selectedKey, setSelectedKey] = useState<string>("all");
+
+
     const filteredPosts = posts.filter((post) => {
-        if (filter === "Все посты")  return  post.status === "published" || post.authorId === userId ;
-        if (filter === "Мои посты")  return post.authorId === Number(userId);
-        if (filter === "Черновики")  return post.status === "draft" && post.authorId === Number(userId);
+        if (selectedKey === "all")  return  post.status === "published" || post.authorId === userId ;
+        if (selectedKey  === "my")  return post.authorId === Number(userId);
+        if (selectedKey  === "drafts")  return post.status === "draft" && post.authorId === Number(userId);
         return true;
     });
-
 
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -74,6 +85,7 @@ const WriterPosts = () => {
             content: post.content,
             image: imageUrl,
         });
+        setEditingPost(post)
         setIsEditModalOpen(true);
     };
     const closeEditModal = () => {
@@ -179,7 +191,9 @@ const WriterPosts = () => {
                 onClose={closeEditModal}
                 form={form}
                 title="Редактировать"
-                onSubmit={onEditSubmit}/>
+                onSubmit={onEditSubmit}
+                post ={editingPost}
+            />
 
 
             {/*окно для создания*/}
@@ -221,29 +235,24 @@ const WriterPosts = () => {
 
                 {/*посты*/}
                 <section className="flex flex-col ml-[240px] w-[768px] gap-6">
-                    <Menubar className="w-[304px]">
+                    <Menubar
+                        key={selectedKey}
+                        className="w-[304px]"
+                       >
                         <MenubarMenu>
-                            <MenubarTrigger
-                                onClick={() => setFilter("Все посты")}
-                                className={clsx(filter === "Все посты" && "bg-slate-100 ")}
-                            >
-                                Все посты
-                            </MenubarTrigger>
-                            <MenubarTrigger
-                                onClick={() => setFilter("Мои посты")}
-                                className={clsx(filter === "Мои посты" && "bg-slate-100 ")}
-                            >
-                                Мои посты
-                            </MenubarTrigger>
-                            <MenubarTrigger
-                                onClick={() => setFilter("Черновики")}
-                                className={clsx(filter === "Черновики" && "bg-slate-100")}
-                            >
-                                Черновики
-                            </MenubarTrigger>
+                            {menuItems.map((item) =>(
+                                <MenubarTrigger
+                                    key ={item.key}
+                                    onClick={() => {
+                                        setSelectedKey(item.key);
+                                    }}
+                                    className={clsx(selectedKey === item.key && "bg-slate-100","cursor-pointer")}>
+                                    {item.label}
+                                </MenubarTrigger>
+                            ))}
                         </MenubarMenu>
                     </Menubar>
-                    {filter === "Мои посты" && <Button onClick={openCreateModal}>Создать пост</Button>}
+                    {selectedKey === "my" && <Button onClick={openCreateModal}>Создать пост</Button>}
                     {filteredPosts.map((post) => (
                         <PostCard
                             key={post.id}

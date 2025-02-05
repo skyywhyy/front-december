@@ -45,9 +45,9 @@ const PostCard: FC<PostCardProps> = ({
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col">
-                    <Label className="font-normal">Автор под айдишником {post.authorId}</Label>
-                    <Label className="text-xs text-slate-400"> {date}</Label>
+                <div className="flex flex-col ">
+                    <Label className="font-normal cursor-pointer">Автор под айдишником {post.authorId}</Label>
+                    <Label className="text-xs text-slate-400 cursor-pointer"> {date}</Label>
                 </div>
             </div>
             <CardTitle>{post.title}</CardTitle>
