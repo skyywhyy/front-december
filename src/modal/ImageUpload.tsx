@@ -47,7 +47,7 @@ const ImageUpload :React.FC<ImageUploadProps> = ({ initialImageUrl,fileSelect}  
             <div className="absolute inset-0 bg-black rounded-md bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <Delete
                 onClick={handleRemoveClick}
-                className="absolute top-0 right-0 m-4"
+                className="absolute top-0 right-0 m-4 cursor-pointer"
             />
         </div>
     );
@@ -61,8 +61,8 @@ const ImageUpload :React.FC<ImageUploadProps> = ({ initialImageUrl,fileSelect}  
                 className="hidden"
                 onChange={handleFileChange}
             />
-            <Button onClick={handleUploadClick}>
-                <Upload /> Загрузить изображение
+            <Button onClick={handleUploadClick} >
+                <Upload  /> Загрузить изображение
             </Button>
         </>
     );

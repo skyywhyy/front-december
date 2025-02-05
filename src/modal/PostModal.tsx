@@ -6,6 +6,7 @@ import {Textarea} from "@/components/ui/textarea.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {UseFormReturn} from "react-hook-form";
 import {FC} from "react";
+import {Post} from "@/context/PostContext.tsx";
 
 interface PostFormValues {
     title: string;
@@ -18,16 +19,16 @@ interface PostModalProps {
     form: UseFormReturn<PostFormValues>;
     onSubmit: (values: PostFormValues, action: "publish" | "draft") => void | Promise<void>;
     title: string;
+    post?: Post | null;
 }
 
-const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title}) => {
+const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title , post}) => {
     if (!isOpen) return null;
 
     return(
         <div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
             onClick={(e) => {
-                // Если пользователь выделил текст, то getSelection()?.toString() вернёт строку с выделенным текстом
                 if (window.getSelection()?.toString()) {
                     e.stopPropagation();
                     return;
@@ -94,26 +95,44 @@ const PostModal: FC<PostModalProps> = ({isOpen, onClose, form, onSubmit, title})
                                     </FormItem>
                                 )}
                             />
+
                             {/* Кнопка отправки */}
-                            <div className='flex gap-2'>
+                            {post && post.status ==="published" ? (
+                                <div className='flex gap-2'>
                                 <Button
-                                    type="button"
-                                    onClick={form.handleSubmit((values) =>
-                                        onSubmit(values, "publish")
-                                    )}
-                                >
-                                    Опубликовать пост
-                                </Button>
-                                <Button
-                                    variant="secondary"
                                     type="button"
                                     onClick={form.handleSubmit((values) =>
                                         onSubmit(values, "draft")
                                     )}
                                 >
-                                    Отправить в черновики
+                                    Изменить пост
                                 </Button>
-                            </div>
+                                </div>
+                            ) : (
+                                <div className='flex gap-2'>
+                                    <Button
+                                        type="button"
+                                        onClick={form.handleSubmit((values) =>
+                                            onSubmit(values, "publish")
+                                        )}
+                                    >
+                                        Опубликовать пост
+                                    </Button>
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={form.handleSubmit((values) =>
+                                            onSubmit(values, "draft")
+                                        )}
+                                    >
+                                        Отправить в черновики
+                                    </Button>
+                                </div>
+                            )
+
+                            }
+
+
 
                         </div>
 
